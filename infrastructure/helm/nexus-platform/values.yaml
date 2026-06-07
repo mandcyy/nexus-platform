@@ -1,0 +1,66 @@
+global:
+  environment: production
+  imageRegistry: ghcr.io/nexus-platform
+  imageTag: latest
+
+auth:
+  replicas: 3
+  maxReplicas: 50
+  resources:
+    requests: { cpu: "500m", memory: "512Mi" }
+    limits: { cpu: "2", memory: "2Gi" }
+
+chat:
+  replicas: 3
+  maxReplicas: 30
+  resources:
+    requests: { cpu: "250m", memory: "256Mi" }
+    limits: { cpu: "1", memory: "1Gi" }
+
+media:
+  replicas: 2
+  resources:
+    requests: { cpu: "250m", memory: "512Mi" }
+
+ai:
+  replicas: 2
+  resources:
+    requests: { cpu: "1", memory: "2Gi" }
+    limits: { cpu: "4", memory: "8Gi" }
+
+postgres:
+  primary:
+    storage: 500Gi
+    resources: { requests: { cpu: "2", memory: "4Gi" } }
+
+redis:
+  cluster:
+    nodes: 3
+    storage: 50Gi
+
+kafka:
+  replicas: 3
+  storage: 100Gi
+
+elasticsearch:
+  replicas: 2
+  storage: 200Gi
+
+minio:
+  storage: 1Ti
+
+ingress:
+  enabled: true
+  tls: true
+  host: nexus-platform.com
+
+monitoring:
+  prometheus:
+    enabled: true
+    retention: 30d
+  grafana:
+    enabled: true
+    adminPassword: changeme
+  jaeger:
+    enabled: true
+    storage: 100Gi

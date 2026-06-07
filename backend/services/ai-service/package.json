@@ -1,0 +1,1 @@
+{"name":"@nexus/ai-service","version":"1.0.0","scripts":{"build":"nest build","start":"nest start"},"dependencies":{"@nestjs/common":"^10.3.0","@nestjs/core":"^10.3.0","openai":"^4.40.0","kafkajs":"^2.2.0","node-fetch":"^3.3.0"}}

@@ -1,0 +1,11 @@
+apiVersion: v2
+name: nexus-platform
+description: Nexus Platform - Enterprise Social Communication
+version: 1.0.0
+appVersion: "1.0.0"
+type: application
+keywords:
+  - messaging
+  - communication
+  - enterprise
+  - social

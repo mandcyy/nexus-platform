@@ -1,0 +1,28 @@
+syntax = "proto3";
+package nexus.auth;
+
+service AuthService {
+  rpc ValidateToken (TokenRequest) returns (TokenResponse);
+  rpc GetUser (UserRequest) returns (UserResponse);
+  rpc GetKeyBundle (KeyBundleRequest) returns (KeyBundleResponse);
+}
+
+message TokenRequest { string token = 1; }
+message TokenResponse {
+  bool valid = 1;
+  string user_id = 2;
+  string session_id = 3;
+  string role = 4;
+}
+message UserRequest { string user_id = 1; }
+message UserResponse {
+  string id = 1; string username = 2; string display_name = 3;
+  string avatar_url = 4; string status = 5;
+}
+message KeyBundleRequest { string user_id = 1; }
+message KeyBundleResponse {
+  string user_id = 1; string identity_key = 2;
+  string signed_pre_key = 3; int32 signed_pre_key_id = 4;
+  string one_time_pre_key = 5; int32 one_time_pre_key_id = 6;
+  int32 registration_id = 7;
+}

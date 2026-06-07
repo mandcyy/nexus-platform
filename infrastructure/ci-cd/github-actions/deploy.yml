@@ -1,0 +1,73 @@
+name: Nexus Platform CI/CD
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main]
+
+env:
+  DOCKER_REGISTRY: ghcr.io
+  K8S_NAMESPACE: nexus-platform
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [auth-service, chat-service]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with: { node-version: '20' }
+    - run: cd backend/services/${{ matrix.service }} && npm ci && npm test
+
+  build-and-push:
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [auth-service, chat-service, api-gateway]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: docker/login-action@v3
+      with:
+        registry: ${{ env.DOCKER_REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - uses: docker/build-push-action@v5
+      with:
+        context: backend/services/${{ matrix.service }}
+        push: true
+        tags: ${{ env.DOCKER_REGISTRY }}/nexus-platform/${{ matrix.service }}:${{ github.sha }}
+
+  deploy-staging:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: azure/k8s-set-context@v3
+      with:
+        kubeconfig: ${{ secrets.KUBECONFIG_STAGING }}
+    - run: |
+        cd infrastructure/kubernetes
+        kustomize build overlays/staging | kubectl apply -f -
+        kubectl set image deployment/auth-service auth-service=${{ env.DOCKER_REGISTRY }}/nexus-platform/auth-service:${{ github.sha }} -n ${{ env.K8S_NAMESPACE }}
+        kubectl set image deployment/chat-service chat-service=${{ env.DOCKER_REGISTRY }}/nexus-platform/chat-service:${{ github.sha }} -n ${{ env.K8S_NAMESPACE }}
+
+  deploy-production:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - uses: azure/k8s-set-context@v3
+      with:
+        kubeconfig: ${{ secrets.KUBECONFIG_PRODUCTION }}
+    - run: |
+        cd infrastructure/kubernetes
+        kustomize build overlays/prod | kubectl apply -f -
+        kubectl set image deployment/auth-service auth-service=${{ env.DOCKER_REGISTRY }}/nexus-platform/auth-service:${{ github.sha }} -n ${{ env.K8S_NAMESPACE }}
+        kubectl rollout status deployment/auth-service -n ${{ env.K8S_NAMESPACE }}
+        kubectl rollout status deployment/chat-service -n ${{ env.K8S_NAMESPACE }}

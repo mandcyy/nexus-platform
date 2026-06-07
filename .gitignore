@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.gradle/
+build/
+*.apk
+*.aab
+*.jar
+*.class
+*.dex
+*.log
+*.tmp
+*.swp
+*.iml
+.idea/
+.vscode/
+local.properties
+*.keystore
+*.jks
+.env
+.env.*
+!.env.example
+
+# Android
+android/app/build/
+android/build/
+android/.gradle/
+android/captures/
+android/.externalNativeBuild/
+
+# Backend
+backend/**/dist/
+backend/**/node_modules/
+backend/**/coverage/
+
+# Infrastructure
+infrastructure/terraform/.terraform/
+infrastructure/terraform/*.tfstate*
+infrastructure/terraform/*.tfvars
+!infrastructure/terraform/*.tfvars.example
+
+# Admin
+admin-dashboard/node_modules/
+admin-dashboard/build/
+admin-dashboard/.env
+
+# Web Client
+web-client/node_modules/
+web-client/build/
+
+# Secrets (never commit!)
+cloudflare/deploy/.cf_token
+cloudflare/deploy/check_cf.py
+cloudflare/deploy/.git_token
+.git_token
+
+# OS
+.DS_Store
+Thumbs.db

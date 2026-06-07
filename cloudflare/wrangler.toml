@@ -1,0 +1,72 @@
+name = "nexus-platform"
+main = "workers/api-gateway/src/index.ts"
+compatibility_date = "2024-06-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ──── API Gateway Worker ────
+[env.production]
+name = "nexus-api-gateway"
+routes = [
+  { pattern = "api.nexus-platform.com/*", zone_name = "nexus-platform.com" }
+]
+
+[[env.production.durable_objects.bindings]]
+name = "CHAT_ROOM"
+class_name = "ChatRoom"
+
+[[env.production.durable_objects.bindings]]
+name = "PRESENCE"
+class_name = "PresenceManager"
+
+[[env.production.durable_objects.bindings]]
+name = "USER_SESSION"
+class_name = "UserSession"
+
+[[env.production.kv_namespaces]]
+binding = "AUTH_CACHE"
+id = "AUTH_CACHE_ID"
+
+[[env.production.kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "RATE_LIMIT_ID"
+
+[[env.production.r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "nexus-media"
+
+[[env.production.d1_databases]]
+binding = "NEXUS_DB"
+database_name = "nexus-platform"
+database_id = "NEXUS_DB_ID"
+
+[[env.production.queues.producers]]
+binding = "MESSAGE_QUEUE"
+queue = "nexus-messages"
+
+[[env.production.queues.producers]]
+binding = "NOTIFICATION_QUEUE"
+queue = "nexus-notifications"
+
+[[env.production.queues.consumers]]
+queue = "nexus-messages"
+max_batch_size = 10
+max_batch_timeout = 1
+
+[[env.production.services]]
+binding = "EXTERNAL_AI"
+service = "nexus-ai-external"
+environment = "production"
+
+[[env.production.services]]
+binding = "EXTERNAL_SEARCH"
+service = "nexus-search-external"
+
+# ──── Dev Environment ────
+[env.staging]
+name = "nexus-staging"
+workers_dev = true
+
+# ──── Durable Object Migrations ────
+[[migrations]]
+tag = "v1"
+new_classes = ["ChatRoom", "PresenceManager", "UserSession"]
